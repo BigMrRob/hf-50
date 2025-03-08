@@ -1,0 +1,23 @@
+# Ignore development files
+.git
+.github
+.vscode
+node_modules
+**/.next/cache
+**/.turbo
+
+# Ignore large test files
+**/*.test.js
+**/*.spec.js
+**/__tests__
+
+# Ignore large documentation files
+docs
+**/README.md
+**/CHANGELOG.md
+**/LICENSE
+
+# Ignore large development assets
+**/*.psd
+**/*.ai
+**/*.sketch 

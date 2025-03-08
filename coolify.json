@@ -1,0 +1,20 @@
+{
+  "build": {
+    "resources": {
+      "cpu": 0.5,
+      "memory": 2048
+    },
+    "useCustomDockerfile": true,
+    "dockerfilePath": ".coolify/Dockerfile"
+  },
+  "deploy": {
+    "resources": {
+      "cpu": 0.5,
+      "memory": 1024
+    },
+    "envs": {
+      "NODE_ENV": "production",
+      "NODE_OPTIONS": "--max-old-space-size=1024"
+    }
+  }
+}
