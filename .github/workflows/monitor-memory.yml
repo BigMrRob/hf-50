@@ -1,0 +1,63 @@
+name: Monitor Memory Usage
+
+on:
+  workflow_dispatch: # Manual trigger only
+
+jobs:
+  memory-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.2.1
+
+      - name: Install memory monitoring tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y htop time
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Show available memory
+        run: |
+          free -h
+          echo "Total memory available in GitHub runner:"
+          grep MemTotal /proc/meminfo
+
+      - name: Monitor memory during build
+        run: |
+          # Start memory monitoring in background
+          (while true; do ps aux | grep "node" | grep -v grep; sleep 5; done) > memory_usage.log &
+          MONITOR_PID=$!
+
+          # Run the build with memory settings and time it
+          NODE_OPTIONS="--max-old-space-size=2048" \
+          NEXT_TELEMETRY_DISABLED=1 \
+          /usr/bin/time -v pnpm build
+
+          # Stop monitoring
+          kill $MONITOR_PID
+
+      - name: Show memory usage report
+        run: |
+          echo "Memory usage during build:"
+          cat memory_usage.log
+          echo "Peak memory usage:"
+          grep "Maximum resident set size" memory_usage.log || echo "No memory data captured"
+
+      - name: Upload memory logs as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: memory-logs
+          path: memory_usage.log

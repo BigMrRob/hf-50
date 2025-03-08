@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "NODE_OPTIONS=\"--max-old-space-size=4096\" pnpm build"
+buildCommand = "pnpm install --frozen-lockfile && NODE_OPTIONS=\"--max-old-space-size=4096\" pnpm build"
 
 [deploy]
 startCommand = "cd apps/web && node .next/standalone/server.js"

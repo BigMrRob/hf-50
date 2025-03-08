@@ -1,0 +1,42 @@
+name: Validate Docker Build
+
+on:
+  workflow_dispatch: # Manual trigger
+  pull_request:
+    paths:
+      - ".coolify/Dockerfile"
+      - "docker-compose.yml"
+      - "coolify.json"
+
+jobs:
+  docker-build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate Coolify Dockerfile
+        run: |
+          # Check if Dockerfile is valid
+          docker build --progress=plain -f .coolify/Dockerfile -t test-coolify-build --no-cache \
+            --build-arg NODE_OPTIONS="--max-old-space-size=2048" \
+            --build-arg NEXT_TELEMETRY_DISABLED=1 \
+            --memory=2g \
+            --memory-swap=2g \
+            .
+
+      - name: Show Docker logs
+        if: always()
+        run: |
+          echo "Docker build logs:"
+          docker logs $(docker ps -lq) 2>&1 || echo "No container logs available"
+
+      - name: Clean up
+        if: always()
+        run: |
+          docker image rm test-coolify-build || true
+          docker system prune -f || true

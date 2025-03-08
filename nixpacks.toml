@@ -1,6 +1,9 @@
 [variables]
 NODE_OPTIONS = "--max-old-space-size=4096"
 
+[phases.install]
+cmds = ["pnpm install --frozen-lockfile"]
+
 [phases.build]
 cmds = ["pnpm run build"]
-dependsOn = ["setup"] 
+dependsOn = ["install"] 
